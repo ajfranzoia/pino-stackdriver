@@ -1,8 +1,8 @@
 {
-  "name": "pino-stackdriver",
-  "version": "3.0.0",
+  "name": "@ajfranzoia/pino-stackdriver",
+  "version": "4.0.0",
   "description": "A transport for pino that sends messages to Google Stackdriver Logging",
-  "homepage": "https://github.com/ovhemert/pino-stackdriver",
+  "homepage": "https://github.com/ajfranzoia/pino-stackdriver",
   "main": "src/index.js",
   "types": "pino-stackdriver.d.ts",
   "scripts": {
@@ -26,7 +26,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ovhemert/pino-stackdriver.git"
+    "url": "https://github.com/ajfranzoia/pino-stackdriver.git"
   },
   "engines": {
     "node": ">=16"
