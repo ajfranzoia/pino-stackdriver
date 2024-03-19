@@ -75,7 +75,7 @@ module.exports.toLogEntry = function (log, options = {}) {
 
   const entry = {
     meta: {
-      resource: resource || { type: 'global' },
+      resource,
       severity,
       trace: _getKey(log, data, 'trace', keys),
       spanId: _getKey(log, data, 'spanId', keys),
@@ -106,7 +106,7 @@ module.exports.toLogEntryStream = function (options = {}) {
 }
 
 module.exports.toStackdriverStream = function (options = {}) {
-  const { logName, projectId, credentials, fallback } = options
+  const { logName, projectId, credentials, fallback, resource } = options
   const opt = {
     logName: logName || 'pino_log',
     projectId,
@@ -122,7 +122,13 @@ module.exports.toStackdriverStream = function (options = {}) {
     }
   }
 
-  const log = new Logging(opt).log(opt.logName)
+  const logging = new Logging(opt)
+  const log = logging.log(opt.logName)
+
+  if (!resource) {
+    logging.setDetectedResource()
+  }
+
   const writableStream = new stream.Writable({
     objectMode: true,
     write (chunk, encoding, callback) {

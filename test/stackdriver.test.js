@@ -175,7 +175,7 @@ test('appends error stack trace to the message field', t => {
 })
 
 test('transforms log to entry in stream', t => {
-  t.plan(3)
+  t.plan(2)
 
   const parseJsonStream = tested.parseJsonStream()
   const toLogEntryStream = tested.toLogEntryStream()
@@ -183,7 +183,6 @@ test('transforms log to entry in stream', t => {
     if (err) { t.fail(err.message) }
     t.ok(result.length === 1)
     t.ok(result[0].meta.severity === 'info')
-    t.same(result[0].meta.resource, { type: 'global' })
   })
   const entry = { level: 30, time: parseInt('1532081790743', 10), msg: 'info message', pid: 9118, hostname: 'Osmonds-MacBook-Pro.local', v: 1 }
   const input = `${JSON.stringify(entry)}\n`

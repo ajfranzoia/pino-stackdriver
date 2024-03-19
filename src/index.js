@@ -7,10 +7,11 @@ module.exports.createWriteStream = ({
   projectId,
   fallback,
   resource,
-  keys
+  keys,
+  serviceContext
 }) => {
   const parseJsonStream = stackdriver.parseJsonStream()
-  const toLogEntryStream = stackdriver.toLogEntryStream({ resource, keys })
+  const toLogEntryStream = stackdriver.toLogEntryStream({ resource, serviceContext, keys })
   const toStackdriverStream = stackdriver.toStackdriverStream({ credentials, logName, projectId, fallback })
   return pumpify(parseJsonStream, toLogEntryStream, toStackdriverStream)
 }
