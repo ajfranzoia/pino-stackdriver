@@ -148,6 +148,32 @@ test('adds spanId to log entry message with option', t => {
   t.ok(entry.meta.httpRequest.url === 'http://localhost/')
 })
 
+test('adds serviceContext to log entry', t => {
+  t.plan(2)
+
+  const log = { level: 30, time: parseInt('1532081790730', 10), spanId: 'my-span-id', httpRequest: { url: 'http://localhost/' }, pid: 9118, hostname: 'Osmonds-MacBook-Pro.local', v: 1 }
+  const entry = tested.toLogEntry(log, { serviceContext: { service: 'my-service', version: '1.0' } })
+  t.ok(entry.data.serviceContext.service === 'my-service')
+  t.ok(entry.data.serviceContext.version === '1.0')
+})
+
+test('sets Error Reporting @type field on error', t => {
+  t.plan(1)
+
+  const log = { level: 50, time: parseInt('1532081790750', 10), msg: 'error message', pid: 9118, hostname: 'Osmonds-MacBook-Pro.local', type: 'Error', stack: 'Error: error message', v: 1 }
+  const entry = tested.toLogEntry(log)
+  t.ok(entry.data['@type'] === 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent')
+})
+
+test('appends error stack trace to the message field', t => {
+  t.plan(1)
+
+  const log = { level: 50, time: parseInt('1532081790750', 10), msg: 'error message', pid: 9118, hostname: 'Osmonds-MacBook-Pro.local', type: 'Error', stack: 'Error: error message', v: 1 }
+  const entry = tested.toLogEntry(log)
+  console.log(entry.data)
+  t.ok(entry.data.message === 'error message\nError: error message')
+})
+
 test('transforms log to entry in stream', t => {
   t.plan(3)
 
@@ -224,24 +250,35 @@ test('works with the fallback option', t => {
   }
 })
 
-test('throws on missing projectId', t => {
+test('does not throw on missing projectId', t => {
   t.plan(1)
 
   const { credentials } = helpers
   try {
     tested.toStackdriverStream({ credentials })
-    t.fail('Should throw on missing projectId')
-  } catch (err) {
     t.ok(true)
+  } catch (err) {
+    t.fail('Should not have thrown')
   }
 })
 
-test('throws on missing options', t => {
+test('does not throw on missing options', t => {
   t.plan(1)
 
   try {
     tested.toStackdriverStream()
-    t.fail('Should throw on missing options')
+    t.ok(true)
+  } catch (err) {
+    t.fail('Should not have thrown')
+  }
+})
+
+test('throws on given serviceContext but missing service', t => {
+  t.plan(1)
+
+  try {
+    tested.toLogEntryStream({ serviceContext: {} })
+    t.fail('Should not have thrown')
   } catch (err) {
     t.ok(true)
   }
