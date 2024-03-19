@@ -1,6 +1,6 @@
 {
   "name": "@ajfranzoia/pino-stackdriver",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "A transport for pino that sends messages to Google Stackdriver Logging",
   "homepage": "https://github.com/ajfranzoia/pino-stackdriver",
   "main": "src/index.js",
