@@ -6,6 +6,7 @@ const through2 = require('through2')
 const { Logging } = require('@google-cloud/logging')
 
 const PINO_LEVELS = { trace: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60 }
+
 // const STACKDRIVER_SEVERITIES = { default: 0, debug: 100, info: 200, notice: 300, warning: 400, error: 500, critical: 600, alert: 700, emergency: 800 }
 
 function _jsonParser (str) {
@@ -50,17 +51,27 @@ module.exports.parseJsonStream = function () {
 }
 
 module.exports.toLogEntry = function (log, options = {}) {
-  const { labels, resource, keys } = options
+  const { labels, resource, keys, serviceContext } = options
   const { prefix } = log
 
   const severity = _levelToSeverity(log.level)
   let message = log.msg || log.message || severity
-  message = (log.level >= PINO_LEVELS.error && log.stack) ? `${message}\n${log.stack}` : message
   message = (prefix) ? `[${prefix}] ${message}` : message
 
   const data = { ...log, message }
   if (data.msg) { delete data.msg }
   if (data.labels) { delete data.labels }
+
+  if (log.level >= PINO_LEVELS.error) {
+    data['@type'] = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent'
+
+    const stack = log.stack || log.err?.stack
+    data.message = `${message}\n${stack}`
+  }
+
+  if (serviceContext) {
+    data.serviceContext = serviceContext
+  }
 
   const entry = {
     meta: {
@@ -82,6 +93,11 @@ module.exports.toLogEntry = function (log, options = {}) {
 }
 
 module.exports.toLogEntryStream = function (options = {}) {
+  if (options.serviceContext && !options.serviceContext.service) {
+    throw new Error('If \'serviceContext\' is specified then ' +
+      '\'serviceContext.service\' is required.')
+  }
+
   const self = this
   return through2.obj(function transport (chunk, enc, cb) {
     const entry = self.toLogEntry(chunk, options)
@@ -91,7 +107,6 @@ module.exports.toLogEntryStream = function (options = {}) {
 
 module.exports.toStackdriverStream = function (options = {}) {
   const { logName, projectId, credentials, fallback } = options
-  if (!projectId) { throw Error('The "projectId" argument is missing') }
   const opt = {
     logName: logName || 'pino_log',
     projectId,

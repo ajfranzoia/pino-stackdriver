@@ -2,11 +2,12 @@
 const es = require('event-stream')
 const pumpify = require('pumpify')
 const sinon = require('sinon')
+const path = require('path')
 const pkg = require('../package.json')
 
 const { Logging } = require('@google-cloud/logging')
 
-module.exports.credentials = '/credentials.json'
+module.exports.credentials = path.join(__dirname, '/credentials.json')
 module.exports.projectId = 'test-project'
 module.exports.fallback = true
 module.exports.package = pkg
