@@ -38,11 +38,6 @@ To include as a library in your project:
 npm install pino-stackdriver
 ```
 
-## CLI
-
-Want to use `pino-stackdriver` from the CLI?
-See the [CLI](./docs/CLI.md) documentation for details.
-
 ## API
 
 Want to use `pino-stackdriver` as a library in your project?
